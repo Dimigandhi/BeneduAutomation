@@ -1,2 +1,3 @@
-# benedu
-가즈아
+# Benedu Automation Script
+
+> 가즈아
