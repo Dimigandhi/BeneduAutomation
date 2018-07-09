@@ -66,6 +66,9 @@ def checking(driver, probIndex, answerNum):
     js_script = "ClickAnswer(\""+str(probIndex)+"\",\""+str(answerNum)+"\")"
     driver.execute_script(js_script)
 
+def getAnswerToDB(driver):
+    print("test")
+    
 
 
 #solve는 아직 문항ID값을 추출해오는거밖에 안했다.
@@ -99,6 +102,8 @@ def solve(driver):
         checking(driver, tmpval, answer)
         tmpval+=1
     driver.find_element_by_xpath("//*[@id=\"btnSubmit\"]").click()
+
+    getAnswerToDB(driver)
 
     
 # 이부분이 메인
