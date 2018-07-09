@@ -1,10 +1,6 @@
-
-prob = "ddd123"
-tmpst = ''
-
-for i in range(len(prob)):
-    if(prob[i].isnumeric()):
-        tmpst = tmpst+prob[i]
+import pymysql
 
 
-print(tmpst)
+sqlflag = [0,2,0,0,0]
+
+print(sqlflag[1])

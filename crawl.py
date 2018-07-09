@@ -1,8 +1,18 @@
-import open_Driver
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+import pymysql
+import random
+
+sql_pw = input("sql 비밀번호를 입력하세요:")
+
+conn = pymysql.connect(host='localhost', port=3306, user='1kl1', password=sql_pw, database='benedu')
+cursor = conn.cursor()
+cursor.execute('SELECT * FROM answersheet;')
+rows = cursor.fetchall()
+sqlflag = [0,0,0,0,0] # 0 이면 안하고 1이면 해라
+
 
 def open_page(user_email, user_password):
     driver = webdriver.Chrome("chromedriver.exe")
@@ -26,6 +36,7 @@ def gotoPage(driver):
     value = 1
     while(value<=1):
         driver.execute_script("DoTakeExam("+itsnumber+","+str(value)+")")
+        driver.implicitly_wait(2)
         solve(driver)
         value += 1
     
@@ -38,6 +49,25 @@ def toInt(tmpString):
             tmpst = tmpst+tmpString[i]
     return int(tmpst)
 
+def checkProbNum(tmpval, probNum):
+    answer = -1
+    for row in rows:
+        #row[0] : id, row[1] : answer, row[2]: author, row[3]: date, row[4]: description, row[5]: probnum
+        if(probNum==row[5]):
+            answer = row[1]
+    if(answer == -1):
+            answer = random.randrange(1,6)
+            sqlflag[tmpval] = 1
+    return answer
+
+
+def checking(driver, probIndex, answerNum):
+    probIndex += 1
+    js_script = "ClickAnswer(\""+str(probIndex)+"\",\""+str(answerNum)+"\")"
+    driver.execute_script(js_script)
+
+
+
 #solve는 아직 문항ID값을 추출해오는거밖에 안했다.
 def solve(driver):
     html = driver.page_source
@@ -47,44 +77,39 @@ def solve(driver):
     prob = []
     pIndex = parpage.find('문항ID : ')+7
     prob.append(parpage[pIndex:pIndex+5])
-    leftpage = parpage[pIndex+5:]
-    pIndex = parpage.find('문항ID : ')+7
-    prob.append(parpage[pIndex:pIndex+5])
-    leftpage = parpage[pIndex+5:]
-    pIndex = parpage.find('문항ID : ')+7
-    prob.append(parpage[pIndex:pIndex+5])
-    leftpage = parpage[pIndex+5:]
-    pIndex = parpage.find('문항ID : ')+7
-    prob.append(parpage[pIndex:pIndex+5])
-    leftpage = parpage[pIndex+5:]
-    pIndex = parpage.find('문항ID : ')+7
-    prob.append(parpage[pIndex:pIndex+5])
+    leftpage = parpage[pIndex+10:]
+    pIndex = leftpage.find('문항ID : ')+7
+    prob.append(leftpage[pIndex:pIndex+5])
+    leftpage = leftpage[pIndex+10:]
+    pIndex = leftpage.find('문항ID : ')+7
+    prob.append(leftpage[pIndex:pIndex+5])
+    leftpage = leftpage[pIndex+10:]
+    pIndex = leftpage.find('문항ID : ')+7
+    prob.append(leftpage[pIndex:pIndex+5])
+    leftpage = leftpage[pIndex+10:]
+    pIndex = leftpage.find('문항ID : ')+7
+    prob.append(leftpage[pIndex:pIndex+5])
 
     tmpval = 0
+    probnum = []
+    
     while(tmpval<5):
-        probnum = toInt(prob[tmpval])
-        print(probnum)
+        probnum.append(toInt(prob[tmpval]))
+        answer = checkProbNum(tmpval, probnum[tmpval])
+        checking(driver, tmpval, answer)
         tmpval+=1
+    driver.find_element_by_xpath("//*[@id=\"btnSubmit\"]").click()
 
     
-
-    
-
 # 이부분이 메인
 try :
     driver = open_page(usr_id, usr_pw)
 except:
+
     driver = open_page(input("Email 입력해주세요"),input("비밀번호를 입력해보세요"))
     #open_page는 내가 만든 함수메인 페이지까지 간다. 간 후 driver를 리턴한다.
     gotoPage(driver)
+    conn.close()
     #gotoPage 함수에선 문제를 생성은 안하고 푸는것만 함. 아직 미완성 안에 solve함수를 문제 시트마다 접근한다.
 
 
-# 이 밑부분은 DB 접속할때 쓸 부분
-
-# conn = pymysql.connect(host='localhost', port=3306, user='1kl1', password='', database='benedu')
-# cursor = conn.cursor()
-# cursor.execute('SELECT * FROM answersheet;')
-# res = cursor.fetchall()
-# print(res)
-# conn.close()
