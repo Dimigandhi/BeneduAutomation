@@ -3,14 +3,22 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
-import pymysql
-import random
 from pydub import AudioSegment
 import speech_recognition as sr
-import time
-import requests
-import io
+import pymysql, random, time, requests, io
 
+sql_pw = input("sql 비밀번호를 입력하세요:")
+
+conn = pymysql.connect(host='localhost', port=3306, user='1kl1', password=sql_pw, database='benedu')
+cursor = conn.cursor()
+cursor.execute('SELECT * FROM answersheet;')
+rows = cursor.fetchall()
+sqlflag = [0,0,0,0,0] # 0 이면 안하고 1이면 해라
+
+#
+usr_id =
+usr_pw =
+#
 
 CLIENT_ID = "1027360838218-0c36067e7dtg6cbspb9p4tl6svgshbqn.apps.googleusercontent.com"
 CLIENT_KEY = "-jS5d_00O71rqOir9ViMvg4X"
@@ -46,6 +54,7 @@ def rand_delay(t):
         time.sleep(t-random.randint(1,4))
     return
     
+>>>>>>> ee727b9f404f813aca481aa28e25c3914befd8c2
 
 def open_page(user_email, user_password):
     driver = webdriver.Chrome("chromedriver.exe")
@@ -80,7 +89,7 @@ def gotoPage(driver):
         value += 1
         sqlflag = [0,0,0,0,0]
 
-    
+
 # 문항번호가 몇자리인지 몰라서만든 함수.
 def toInt(tmpString):
     tmpst = ''
@@ -218,6 +227,18 @@ def solve(driver):
         checking(driver, tmpval, answer)
         tmpval+=1
     
+<<<<<<< HEAD
+# 이부분이 메인
+try :
+    driver = open_page(usr_id, usr_pw)
+except:
+    driver = open_page(input("Email 입력해주세요"),input("비밀번호를 입력해보세요"))
+    time.sleep(1)
+    # open_page는 내가 만든 함수메인 페이지까지 간다. 간 후 driver를 리턴한다.
+    gotoPage(driver)
+    conn.close()
+    # gotoPage 함수에선 문제를 생성은 안하고 푸는것만 함. 아직 미완성 안에 solve함수를 문제 시트마다 접근한다.
+=======
     # 시작시간 해결이 안되면 이 부분에 딜레이가 있어야 함.
     # driver.execute_script("grecaptcha = undefined") #캡챠 무시
     iframes = driver.find_element_by_xpath("//*[@id=\"recaptcha\"]/div/div/iframe")
@@ -235,7 +256,6 @@ def solve(driver):
         driver.switch_to_default_content()
         BREAKRECAPTCHA(driver)
 
-        
     
 
     
