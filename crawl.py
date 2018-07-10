@@ -2,32 +2,23 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
-<<<<<<< HEAD
-import pymysql, random, time
+from selenium.common.exceptions import NoSuchElementException
+from pydub import AudioSegment
+import speech_recognition as sr
+import pymysql, random, time, requests, io
 
-# sql_pw = input("sql 비밀번호를 입력하세요:")
-#
-# conn = pymysql.connect(host='localhost', port=3306, user='1kl1', password=sql_pw, database='benedu')
-# cursor = conn.cursor()
-# cursor.execute('SELECT * FROM answersheet;')
-# rows = cursor.fetchall()
+sql_pw = input("sql 비밀번호를 입력하세요:")
+
+conn = pymysql.connect(host='localhost', port=3306, user='1kl1', password=sql_pw, database='benedu')
+cursor = conn.cursor()
+cursor.execute('SELECT * FROM answersheet;')
+rows = cursor.fetchall()
 sqlflag = [0,0,0,0,0] # 0 이면 안하고 1이면 해라
 
 #
 usr_id =
 usr_pw =
 #
-
-=======
-from selenium.common.exceptions import NoSuchElementException
-import pymysql
-import random
-from pydub import AudioSegment
-import speech_recognition as sr
-import time
-import requests
-import io
-
 
 CLIENT_ID = "1027360838218-0c36067e7dtg6cbspb9p4tl6svgshbqn.apps.googleusercontent.com"
 CLIENT_KEY = "-jS5d_00O71rqOir9ViMvg4X"
@@ -98,7 +89,7 @@ def gotoPage(driver):
         value += 1
         sqlflag = [0,0,0,0,0]
 
-    
+
 # 문항번호가 몇자리인지 몰라서만든 함수.
 def toInt(tmpString):
     tmpst = ''
@@ -265,7 +256,6 @@ except:
         driver.switch_to_default_content()
         BREAKRECAPTCHA(driver)
 
-        
     
 
     
@@ -275,4 +265,3 @@ driver = open_page(input("Email 입력해주세요"),input("비밀번호를 입�
 gotoPage(driver)
 conn.close()
 #gotoPage 함수에선 문제를 생성은 안하고 푸는것만 함. 아직 미완성 안에 solve함수를 문제 시트마다 접근한다.
->>>>>>> ee727b9f404f813aca481aa28e25c3914befd8c2
