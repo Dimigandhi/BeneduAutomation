@@ -4,25 +4,31 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 from pydub import AudioSegment
-import SpeechRecognition as sr
+# import SpeechRecognition as sr
 import pymysql, random, time, requests, io
 
-#DB
-dbhost = "localhost"
-dbuser = '1kl1'
-dbpass = input("sql 비밀번호를 입력하세요:")
+#local DB
+# dbhost = "localhost"
+# dbuser = '1kl1'
+# dbpass = input("sql 비밀번호를 입력하세요:")
+
+#Remote DB
+dbhost = "115.68.231.45"
+dbuser = "benedu_READ"
+dbpass = "benpass"
+
 #Benedu
-usr_id = ""
-usr_pw = ""
-#Google
+usr_id = input("베네듀 계정 입력")
+usr_pw = input("베네듀 비밀번호 입력")
+
+#Google API
 CLIENT_ID = "1027360838218-0c36067e7dtg6cbspb9p4tl6svgshbqn.apps.googleusercontent.com"
 CLIENT_KEY = "-jS5d_00O71rqOir9ViMvg4X"
-#
 
-# conn = pymysql.connect(host='localhost', port=3306, user='1kl1', password=sql_pw, database='benedu')
-# cursor = conn.cursor()
-# cursor.execute('SELECT * FROM answersheet;')
-# rows = cursor.fetchall()
+conn = pymysql.connect(host=dbhost, port=3306, user=dbuser, password=dbpass, database='benedu')
+cursor = conn.cursor()
+cursor.execute('SELECT * FROM answerSheet;')
+rows = cursor.fetchall()
 sqlflag = [0,0,0,0,0] # 0 이면 안하고 1이면 해라
 
 DIGITS_DICT = {
@@ -124,8 +130,8 @@ def getAnswerToDB(driver,probNum):
             select = driver.find_element_by_xpath("//*[@id=\"frmBenedu\"]/div[3]/section[2]/div[2]/div[3]/div/div/div[1]/div/div/table/tbody/tr["+str(i+1)+"]/td["+str(j+2)+"]/span")
             if(select.get_attribute("class")=="badge bg_red"):
                 answerReal = select.text()
-                sql = "INSERT INTO answersheet (answer,author,created,category,number) VALUES("+answerReal+",,NOW(),'여기',"+probNum[i]+");"
-                cursor.execute('SELECT * FROM answersheet;')
+                sql = "INSERT INTO answerSheet (answer,author,created,category,number) VALUES("+answerReal+",,NOW(),'여기',"+probNum[i]+");"
+                cursor.execute('SELECT * FROM answerSheet;')
 
         
 def is_exists_by_xpath(driver, xpath):
@@ -138,26 +144,26 @@ def is_exists_by_xpath(driver, xpath):
 def string_to_digits(recognized_string):
     return ''.join([DIGITS_DICT.get(word, "") for word in recognized_string.split(" ")])
 
-def TTS(audio_source):
-    recognizer = sr.Recognizer()
-    with sr.AudioFile(audio_source) as source:
-        audio = recognizer.record(source) 
-
-    audio_output = ""
-
-    try:
-        audio_output = recognizer.recognize_google(audio)
-
-        if any(character.isalpha() for character in audio_output):
-            print("숫자가 나왔다.")
-            audio_output = string_to_digits(recognizer.recognize_houndify(audio, client_id=CLIENT_ID, client_key=CLIENT_KEY))
-            print("DEBUG: "+audio_output)
-    except sr.UnknownValueError:
-        print("모르는 에러")
-    except sr.RequestError as e:
-        print("Google Speach Request ERR")
-
-    return audio_output
+# def TTS(audio_source):
+#     recognizer = sr.Recognizer()
+#     with sr.AudioFile(audio_source) as source:
+#         audio = recognizer.record(source)
+#
+#     audio_output = ""
+#
+#     try:
+#         audio_output = recognizer.recognize_google(audio)
+#
+#         if any(character.isalpha() for character in audio_output):
+#             print("숫자가 나왔다.")
+#             audio_output = string_to_digits(recognizer.recognize_houndify(audio, client_id=CLIENT_ID, client_key=CLIENT_KEY))
+#             print("DEBUG: "+audio_output)
+#     except sr.UnknownValueError:
+#         print("모르는 에러")
+#     except sr.RequestError as e:
+#         print("Google Speach Request ERR")
+#
+#     return audio_output
 
 def BREAKRECAPTCHA(driver):
     # 이녀석이 리캡차 내부 /html/body/div[4]/div[4]/iframe 내부버튼 //*[@id="recaptcha-audio-button"]
@@ -253,8 +259,11 @@ except:
 
 
 # 이부분이 메인
-driver = open_page(input("Email 입력해주세요"),input("비밀번호를 입력해보세요"))
-#open_page는 내가 만든 함수메인 페이지까지 간다. 간 후 driver를 리턴한다.
+driver = open_page(usr_id, usr_pw)
+
+# open_page는 내가 만든 함수메인 페이지까지 간다. 간 후 driver를 리턴한다.
 gotoPage(driver)
 conn.close()
-#gotoPage 함수에선 문제를 생성은 안하고 푸는것만 함. 아직 미완성 안에 solve함수를 문제 시트마다 접근한다.
+
+# gotoPage 함수에선 문제를 생성은 안하고 푸는것만 함. 아직 미완성 안에 solve함수를 문제 시트마다 접근한다.
+
