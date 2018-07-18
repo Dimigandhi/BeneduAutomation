@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 import random
 import time
 
@@ -16,3 +18,4 @@ else:
 print("2")
 
 >>>>>>> ee727b9f404f813aca481aa28e25c3914befd8c2
+>>>>>>> 894a17e6c799920f567e815398e0b660b18c8250
