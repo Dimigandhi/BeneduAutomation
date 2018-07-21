@@ -122,7 +122,7 @@ def rand_delay(t):
         time.sleep(t-random.randint(1,3))
     return
 
-driver = open_page('mamy0320@naver.com','thdehehd1302')
+driver = open_page(input(),input())
 literation = int(input('몇번이나 할까?'))
 
 for i in range(literation):
