@@ -1,4 +1,4 @@
-import os, time, json, urllib.request
+import os, time, json, requests
 
 # from time import gmtime, strftime
 from datetime import datetime
@@ -16,14 +16,18 @@ API_KEY = "b13a4d5d02334e34c33b02a82c4bfef1"
 # Benedu Site Key
 site_Key = "6Lcx81EUAAAAAAHX3UAIdQnNSBjnb0XOPcegqOjZ"
 
+# Localhost Site Key
+site_Key = "6LfhymQUAAAAAOVG5FQtdIbEcw_ywvv_P841oYMb"
+
 json_req = json.dumps({"clientKey":API_KEY,
                        "task":{"type":"NoCaptchaTaskProxyless",
-                               "websiteURL":"https://www.benedu.co.kr",
+                               # "websiteURL":"https://www.benedu.co.kr",
+                               "websiteURL":"https://localhost",
                                "websiteKey":site_Key},
                        "softId":0,
                        "languagePool":"en"})
 
-
-
+results = requests.post(API_URL, data=json_req)
+print(results.text)
 
 # driver = webdriver.Chrome('chromedriver.exe')
