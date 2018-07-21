@@ -21,14 +21,14 @@ from selenium.webdriver.common.keys import Keys
 driver = webdriver.Chrome('chromedriver.exe')
 pytesseract.pytesseract.tesseract_cmd = 'Tesseract-OCR/tesseract.exe'
 
-mainUrl = 'http://benedu.co.kr/Index.aspx'
-homeUrl = 'https://www.benedu.co.kr/Views/01_Students/00StdHome.aspx'
-learnUrl = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
-probUrl = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy01Question.aspx'
+mainURL = 'http://benedu.co.kr/Index.aspx'
+homeURL = 'https://www.benedu.co.kr/Views/01_Students/00StdHome.aspx'
+learnURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
+probURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy01Question.aspx'
 
-def createtestsheet(loop, value):
+def createTestSheet(loop, value):
     # try:
-    driver.get(probUrl)
+    driver.get(probURL)
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '//*[@id=\"tab_tag_1_1\"]')))
     while True:
@@ -103,7 +103,7 @@ def createtestsheet(loop, value):
     # except:
     #     print('DEBUG: CREATESHEET ERROR!')
 
-    driver.get(learnUrl)
+    driver.get(learnURL)
 
 
 def solveTest(loop, value, delay):
@@ -342,7 +342,7 @@ def bypassocr():
     driver.find_element_by_xpath('//*[@id=\"AntiMacroForm\"]/div/div/div[3]/div/div[2]/button').click()
 
     time.sleep(0.2)
-    driver.get(learnUrl)
+    driver.get(learnURL)
 
 
 # --------------------------------------------------답안 데이터 입력
@@ -512,7 +512,7 @@ print('--------------------------------')
 print()
 
 
-driver.get(mainUrl)
+driver.get(mainURL)
 
 print('-----Type in your BenEdu email')
 print('------------------------------')
@@ -550,10 +550,10 @@ while True:
     driver.find_element_by_xpath('//*[@id="btnLogin"]').click()
     time.sleep(4)
 
-    if driver.current_url == homeUrl:
+    if driver.current_url == homeURL:
         break
     else:
-        # driver.get(mainUrl)
+        # driver.get(mainURL)
         # os.system('cls')
         # print()
         # print('Login info incorrect - please try again')
@@ -571,7 +571,7 @@ while True:
 # --------------------------------------------------시험지 풀기
 driver.maximize_window()
 
-driver.get(learnUrl)
+driver.get(learnURL)
 
 while 1:
     try:
@@ -583,7 +583,7 @@ while 1:
             print('DEBUG: Creating new testSheet')
             loop += 1
             value = 0
-            createtestsheet(loop, value)
+            createTestSheet(loop, value)
             continue
 
         # 응시하기
@@ -612,7 +612,7 @@ while 1:
                 print('DEBUG: SOLVE ERROR')
                 value += 1
                 revalue = 1
-                driver.get(learnUrl)
+                driver.get(learnURL)
                 time.sleep(0.2)
                 driver.find_element_by_xpath('//*[text()[contains(.,\'TEST\')]]').click()
                 continue
@@ -621,13 +621,13 @@ while 1:
                 value += 1
                 # print('qwer = ' + str(value))
                 revalue = 1
-                driver.get(learnUrl)
+                driver.get(learnURL)
                 time.sleep(0.2)
                 driver.find_element_by_xpath('//*[text()[contains(.,\'TEST\')]]').click()
                 continue
 
         if int(value) > 9:
-            createtestsheet(loop, value)
+            createTestSheet(loop, value)
             loop += 1
             value = 0
             print('DEBUG: tried all 9 tests. resetting')
