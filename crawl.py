@@ -55,7 +55,7 @@ rows = cursor.fetchall()
 sqlflag = [0,0,0,0,0] # 0 이면 안하고 1이면 해라
 
 
-def login(benID, benPW):
+def login(benID, benPW,driver):
     for i in range(15):
         print()
     print('------------------------------')
@@ -76,7 +76,7 @@ def login(benID, benPW):
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '//*[@id="mnu06StdMyBenedu"]/a')))
     time.sleep(0.2)
-    return
+    return driver
 
 
 # rand_delay는 받는 시간 +-5초 사이의 딜레이를 준다.... 최소 5초는 줘라
@@ -126,19 +126,19 @@ def createTestSheet():
     driver.find_element_by_xpath('//*[@id="body_btnExecute"]').click()
 
     WebDriverWait(driver, 8).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="body_txtTestName"]')))
-    driver.find_element_by_xpath('//*[@id="body_txtTestName"]').send_keys('BENEDU AUTOMATION TESTSHEET')
     WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btnSave2"]')))
     driver.find_element_by_xpath('//*[@id="btnSave2"]').click()
     WebDriverWait(driver, 8).until(
         EC.visibility_of_element_located((By.XPATH, '//*[@id="MessageForm"]/div/div/div[2]/div')))
+    time.sleep(2)
+    driver.find_element_by_xpath('//*[@id="btnCancel"]').click()
     time.sleep(0.2)
-    driver.get(mainURL)
-    time.sleep(0.2)
+
     return
 
 
 def deletetestsheet():
-    driver.get(createSheetURL)
+    driver.get(testURL)
     driver.find_element_by_xpath('//*[@id="DT_TestList"]/tbody/tr[1]/td[1]/input').click()
     driver.execute_script('Checked_Delete()')
     rand_delay(4)
@@ -150,6 +150,7 @@ def deletetestsheet():
 
 
 def gotoPage():
+    time.sleep(random.randint(2,4))
     driver.find_element_by_css_selector('li#mnu03StdStudy.dropdown').click()
     time.sleep(random.randint(1,3))
     driver.find_element_by_css_selector('a[href="03StdStudy02PaperTestList.aspx"]').click()
@@ -261,9 +262,9 @@ benPW = input('Benedu Password: ')
 liter = int(input('문제 답안 크롤링 횟수'))
 
 driver = webdriver.Chrome('chromedriver.exe')
-driver.maximize_window()
+#driver.maximize_window()
 
-login(benID, benPW)
+driver = login(benID, benPW,driver)
 
 for i in range(liter):
     createTestSheet()
@@ -273,6 +274,8 @@ for i in range(liter):
     rand_delay(4)
     # deletetestsheet()
     rand_delay(4)
+    cursor.execute("SELECT * FROM answerSheet;")
+    rows = cursor.fetchall()
     print("liter complete! counter: " + str(i))
 
 
