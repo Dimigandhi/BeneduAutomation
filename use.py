@@ -1,4 +1,3 @@
-
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -13,25 +12,16 @@ import pymysql, random, time
 sql_user = 'benedu_RW'
 sql_pw = 'bendbpass!@'
 
-NUMS_DICT = {
-    "①" : 1,
-    "②" : 2,
-    "③" : 3,
-    "④" : 4,
-    "⑤" : 5,
-    "zero": "0",
-    "one": "1",
-    "two": "2",
-    "three": "3",
-    "four": "4",
-    "five": "5",
-    "six": "6",
-    "seven": "7",
-    "eight": "8",
-    "nine": "9",
-}
+conn = pymysql.connect(host='115.68.231.45', port=3306, user=sql_user, password=sql_pw, database='benedu')
+cursor = conn.cursor()
+cursor.execute("SELECT * FROM answerSheet;")
+rows = cursor.fetchall()
 
-# 수학은 없다. 나중에 주관식을 처리할 수 있게 할떄 만들예정.
+indexURL = 'https://benedu.co.kr/Index.aspx'
+mainURL = 'https://www.benedu.co.kr/Views/01_Students/00StdHome.aspx'
+testURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
+createSheetURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy01Question.aspx'
+
 SUBJECT_DICT = {
     "korean" : '//*[@id="body_rdoSbjCode_0"]',
     "english" : '//*[@id="body_rdoSbjCode_2"]',
@@ -42,16 +32,13 @@ SUBJECT_DICT = {
     "drafting" : '//*[@id="body_rdoSbjCode_8"]'
 }
 
-indexURL = 'https://benedu.co.kr/Index.aspx'
-mainURL = 'https://www.benedu.co.kr/Views/01_Students/00StdHome.aspx'
-testURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
-createSheetURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy01Question.aspx'
-
-conn = pymysql.connect(host='115.68.231.45', port=3306, user=sql_user, password=sql_pw, database='benedu')
-cursor = conn.cursor()
-cursor.execute("SELECT * FROM answerSheet;")
-rows = cursor.fetchall()
-
+def rand_delay(t):
+    oper = random.choice(['plus','minus'])
+    if(oper == 'plus'):
+        time.sleep(t+random.randint(1,3))
+    else:
+        time.sleep(t-random.randint(1,3))
+    return
 
 def login(benID, benPW,driver):
     for i in range(15):
@@ -75,17 +62,6 @@ def login(benID, benPW,driver):
         EC.visibility_of_element_located((By.XPATH, '//*[@id="mnu06StdMyBenedu"]/a')))
     time.sleep(0.2)
     return driver
-
-
-# rand_delay는 받는 시간 +-5초 사이의 딜레이를 준다.... 최소 5초는 줘라
-def rand_delay(t):
-    oper = random.choice(['plus','minus'])
-    if(oper == 'plus'):
-        time.sleep(t+random.randint(1,3))
-    else:
-        time.sleep(t-random.randint(1,3))
-    return
-
 
 def createTestSheet(driver):
     WebDriverWait(driver, 5).until(
@@ -134,7 +110,6 @@ def createTestSheet(driver):
 
     return
 
-
 def deletetestsheet(driver):
     driver.find_element_by_css_selector('li#mnu03StdStudy.dropdown').click()
     time.sleep(random.randint(1,3))
@@ -149,7 +124,6 @@ def deletetestsheet(driver):
     time.sleep(2)
     return
 
-
 def gotoPage(driver):
     time.sleep(random.randint(2,4))
     driver.find_element_by_css_selector('li#mnu03StdStudy.dropdown').click()
@@ -160,13 +134,12 @@ def gotoPage(driver):
     itsnumber = itsnumber[itsnumber.find("ShowPop(\"")+9:itsnumber.find("\", ")]
     value = 1
     while(value<=9):
-        driver.execute_script('DoCommentary('+itsnumber+','+str(value)+')')
+        driver.execute_script('DoTakeExam('+itsnumber+','+str(value)+')')
         time.sleep(random.randint(4,6))
-        pre_getAnswer(driver)
+        solve(driver)
         time.sleep(random.randint(4,6))
         value += 1
     return
-
 
 def toInt(tmpString):
     tmpst = ''
@@ -175,23 +148,31 @@ def toInt(tmpString):
             tmpst = tmpst+tmpString[i]
     return int(tmpst)
 
-
-def findDB(probNum):
+def checkProbNum(tmpval, probNum):
+    answer = -1
     for row in rows:
-        # row[0] : id, row[1] : qid, row[2] : qans, row[3]: qtext, row[4]:timestamp
-        if(probNum == row[1]):
-            return False
-    return True
+        #row[0] : id, row[1] : answer, row[2]: author, row[3]: date, row[4]: description, row[5]: probnum
+        if(probNum==row[1]):
+            print('We did it!!!')
+            return row[2]
+    if(answer == -1):
+            answer = random.randrange(1,6)
+            
+    return answer
+
+def checking(driver, probIndex, answerNum):
+    probIndex += 1
+    js_script = "ClickAnswer(\""+str(probIndex)+"\",\""+str(answerNum)+"\")"
+    driver.execute_script(js_script)
+    time.sleep(random.randint(1,3))
 
 
-def pre_getAnswer(driver):
+def solve(driver):
     html = driver.page_source
-
     parpage = str(BeautifulSoup(html, 'html.parser'))
 
     print('DEBUG: parsing through String')
     prob = []
-
     pIndex = parpage.find('문항ID : ')+7
     prob.append(parpage[pIndex:pIndex+7])
     leftpage = parpage[pIndex+10:]
@@ -207,61 +188,34 @@ def pre_getAnswer(driver):
     pIndex = leftpage.find('문항ID : ')+7
     prob.append(leftpage[pIndex:pIndex+7])
 
-    parpage = str(BeautifulSoup(html, 'html.parser'))
-
-    answer = []
-    pIndex = parpage.find('AnswerCorrectImage')+30
-    leftpage = parpage[pIndex+10:]
-    # 처음 함수를 건너뜀
-    while(leftpage.find('AnswerCorrectImage')!=-1):
-
-        pIndex = leftpage.find('AnswerCorrectImage')+21
-        answer.append(NUMS_DICT[leftpage[pIndex:pIndex+1]])
-        leftpage = leftpage[pIndex+10:]
-    # 찾는다.
-    # AnswerCorrectImage
-
-
-# //*[@id="question_2"]/table/tbody/tr[2]/td[2]
-# //*[@id="question_3"]/table/tbody/tr[2]/td[2]
-
-    # answer = []
-
     tmpval = 0
     probnum = []
 
-    # for k in range(5):
-    #     for m in range(5):
-    #         xp = "//*[@id=\"question_"+str(k)+"\"]/table/tbody/tr[2]/td["+str(m+1)+"]/span"
+    while(tmpval<5):
+        probnum.append(toInt(prob[tmpval]))
+        answer = checkProbNum(tmpval, probnum[tmpval])
+        checking(driver, tmpval, answer)
+        tmpval+=1
 
-    #         try:
-    #             numElement = driver.find_element_by_xpath(xp)
-    #             if(numElement.value_of_css_property('color')=="rgba(255, 0, 0, 1)"):
-    #                 answer.append(NUMS_DICT[numElement.text])
+    # 시작시간 해결이 안되면 이 부분에 딜레이가 있어야 함.
+    # driver.execute_script("grecaptcha = undefined") #캡챠 무시
+    # iframes = driver.find_element_by_xpath("//*[@id=\"recaptcha\"]/div/div/iframe")
+    # driver.switch_to_frame(iframes)
 
-    #         except NoSuchElementException as identifier:
-    #             print("pass!")
+    # driver.find_element_by_xpath("//*[@id=\"recaptcha-anchor\"]/div[5]").click()
+    #Recaptcha 뚫어야 하는 코드
+    # time.sleep(60)
+    # print('------------------------------')
 
-    # print(probnum)
-    # print(answer)
-    if(len(answer) == 5):
-        while(tmpval < 5):
-            probnum.append(toInt(prob[tmpval]))
-            if(findDB(probnum[tmpval])):
-                dbtuple = (probnum[tmpval], answer[tmpval])
-                print(dbtuple)
-                sql = "INSERT INTO answerSheet(qid,qans) VALUES(%s,%s)"
-                cursor.execute(sql, dbtuple)
-            print("SQL Executed")
-            tmpval += 1
-        conn.commit()
+    # driver.find_element_by_xpath("//*[@id=\"btnSubmit\"]").click()
+    # getAnswerToDB(driver,probnum)
 
-def crawlMain():
+def useMain():
     # benID = input('Benedu Email: ')
     # benPW = input('Benedu Password: ')
     benID = 'mamy0320@naver.com'
     benPW = 'thdehehd1302'
-    liter = int(input('문제 답안 크롤링 횟수'))
+    liter = int(input('문제 풀이 시트 개수'))
 
     driver = webdriver.Chrome('chromedriver.exe')
     #driver.maximize_window()
@@ -279,8 +233,4 @@ def crawlMain():
         cursor.execute("SELECT * FROM answerSheet;")
         rows = cursor.fetchall()
         print("liter complete! counter: " + str(i))
-
-
     conn.close()
-
-# gotoPage 함수에선 문제를 생성은 안하고 푸는것만 함. 아직 미완성 안에 solve함수를 문제 시트마다 접근한다.
