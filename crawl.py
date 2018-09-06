@@ -12,6 +12,11 @@ import pymysql, random, time
 sql_user = 'benedu_RW'
 sql_pw = 'bendbpass!@'
 
+benID = 'angrypig777@gmail.com'
+# benID = input('Benedu Email: ')
+# benPW = ''
+benPW = input('Benedu Password: ')
+
 NUMS_DICT = {
     "①" : 1,
     "②" : 2,
@@ -52,9 +57,10 @@ SUBJECT_DICT = {
 }
 
 indexURL = 'https://benedu.co.kr/Index.aspx'
-mainURL = 'https://www.benedu.co.kr/Views/01_Students/00StdHome.aspx'
-testURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
+mainURL = 'https://benedu.co.kr/Views/01_Students/00StdHome.aspx'
+testURL = 'https://benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
 createSheetURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
+taskURL = 'https://benedu.co.kr/Views/01_Students/03StdStudy04Homework.aspx'
 
 conn = pymysql.connect(host='115.68.231.45', port=3306, user=sql_user, password=sql_pw, database='benedu')
 cursor = conn.cursor()
@@ -99,7 +105,12 @@ def rand_delay(t):
 
 
 def createTestSheet():
-    driver.get(createSheetURL)
+    # driver.get(createSheetURL)
+    # time.sleep(0.5)
+
+    driver.find_element_by_css_selector('#mnu03StdStudy > a').click()
+    time.sleep(0.1)
+    driver.find_element_by_css_selector('#mnu03StdStudy > ul > li:nth-child(1) > a').click()
     time.sleep(0.5)
 
     WebDriverWait(driver, 5).until(
@@ -111,9 +122,11 @@ def createTestSheet():
     time.sleep(0.2)
     driver.find_element_by_css_selector('#body_chkSrc01').click()  # 모의고사만
     time.sleep(0.2)
-    driver.find_element_by_css_selector('#body_chkSrc01').clear()  # 문항 수 삭제
+    driver.find_element_by_css_selector('#body_TextBox2').clear()  # 문항 수 삭제
+    time.sleep(0.2)
+    driver.find_element_by_css_selector('#body_TextBox2').clear()
     time.sleep(0.5)
-    driver.find_element_by_css_selector('#body_chkSrc01').send_keys('45')  # 문항 수 45
+    driver.find_element_by_css_selector('#body_TextBox2').send_keys('45')  # 문항 수 45
     time.sleep(0.5)
     driver.find_element_by_css_selector('#body_btnExecute').click()  # 검색
 
@@ -128,42 +141,52 @@ def createTestSheet():
     time.sleep(0.2)
     driver.find_element_by_css_selector('#btnSave2').click()
     WebDriverWait(driver, 8).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnDoTest')))  # 바로 응시하기 나올때까지 대기
+        EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnDoTest')))  # 바로 응시하기 텍스트 대기
     time.sleep(0.5)
 
     return
 
 
-def deletetestsheet(driver):
-    driver.find_element_by_css_selector('li#mnu03StdStudy.dropdown').click()
-    time.sleep(random.randint(1,3))
-    driver.find_element_by_css_selector('a[href="03StdStudy02PaperTestList.aspx"]').click()
-    time.sleep(random.randint(1,3))
-    driver.find_element_by_xpath('//*[@id="DT_TestList"]/tbody/tr[1]/td[1]/input').click()
-    driver.execute_script('Checked_Delete()')
-    time.sleep(0.5)
-    driver.execute_script('Checked_Delete_OK()')
-    time.sleep(0.5)
-    driver.find_element_by_xpath('//*[@id="AlertForm"]/div/div/div[3]/div/div[2]/button').click()
-    time.sleep(2)
+def deleteSheet():
+    driver.get(testURL)
+    
+    driver.find_element_by_css_selector(
+        '#DT_TestList > tbody > tr:nth-child(1) > td:nth-child(1) > input[type="checkbox"]').click()  # 리스트 최상위 선택
+    time.sleep(0.2)
+    driver.find_element_by_css_selector('#container_left > button:nth-child(1)').click()  # 선택삭제버튼 클릭
+    time.sleep(1)
+    # WebDriverWait(driver, 8).until(
+    #     EC.element_to_be_clickable((
+    #         By.CSS_SELECTOR, '#CheckAllDeleteForm > div > div > div.box-footer > button.btn.btn-default')))
+    # time.sleep(0.2)
+    driver.find_element_by_css_selector(
+        '#CheckAllDeleteForm > div > div > div.box-footer > button.btn.btn-default').click()  # 삭제버튼 클릭
+    WebDriverWait(driver, 8).until(EC.visibility_of_element_located((
+        By.CSS_SELECTOR, '#txtMessage')))  # 모두 삭제되었습니다 메시지 확인
+    time.sleep(0.2)
+    driver.find_element_by_css_selector(
+        '#AlertForm > div > div > div.box-footer > div > div.container_item_c > button').click()  # 확인버튼
+
     return
 
 
-def gotoPage(driver):
-    time.sleep(random.randint(2,4))
-    driver.find_element_by_css_selector('li#mnu03StdStudy.dropdown').click()
-    time.sleep(random.randint(1,3))
-    driver.find_element_by_css_selector('a[href="03StdStudy02PaperTestList.aspx"]').click()
-    time.sleep(random.randint(1,3))
+def crawlTest():
+    driver.get(testURL)
+    time.sleep(0.5)
+
+    # 1번을 응시하는 것이 아니라 CSS selector에서 CRAWLSHEET를 응시하도록 선택, deleteSheet도 동일하게 만들어야 함
+    driver.find_element_by_css_selector('#DT_TestList > tbody > tr:nth-child(1) > td:nth-child(4)').click()  # 1번 응시
+    time.sleep(0.2)
+    
     itsnumber = str(driver.find_element_by_xpath('//*[@id="DT_TestList"]/tbody/tr[1]/td[2]').get_attribute("onclick"))
     itsnumber = itsnumber[itsnumber.find("ShowPop(\"")+9:itsnumber.find("\", ")]
     value = 1
     while(value<=9):
         driver.execute_script('DoCommentary('+itsnumber+','+str(value)+')')
-        time.sleep(random.randint(4,6))
+        time.sleep(0.2)
         pre_getAnswer(driver)
-        time.sleep(random.randint(4,6))
         value += 1
+
     return
 
 
@@ -172,15 +195,16 @@ def toInt(tmpString):
     for i in range(len(tmpString)):
         if(tmpString[i].isnumeric()):
             tmpst = tmpst+tmpString[i]
+
     return int(tmpst)
 
 
-def findDB(probNum):
-    cursor.execute("SELECT * FROM answerSheet;")
+def checkDB(probNum):
+    cursor.execute("SELECT qid FROM answerSheet WHERE qid=\'" + str(probNum) + "';")
     rows = cursor.fetchall()
+
     for row in rows:
-        # row[0] : id, row[1] : qid, row[2] : qans, row[3]: qtext, row[4]:timestamp
-        if(probNum == row[1]):
+        if probNum == row[0]:
             return False
     return True
 
@@ -219,36 +243,16 @@ def pre_getAnswer(driver):
         pIndex = leftpage.find('AnswerCorrectImage')+21
         answer.append(NUMS_DICT[leftpage[pIndex:pIndex+1]])
         leftpage = leftpage[pIndex+10:]
-    # 찾는다.
-    # AnswerCorrectImage
-
-
-# //*[@id="question_2"]/table/tbody/tr[2]/td[2]
-# //*[@id="question_3"]/table/tbody/tr[2]/td[2]
 
     # answer = []
 
     tmpval = 0
     probnum = []
 
-    # for k in range(5):
-    #     for m in range(5):
-    #         xp = "//*[@id=\"question_"+str(k)+"\"]/table/tbody/tr[2]/td["+str(m+1)+"]/span"
-
-    #         try:
-    #             numElement = driver.find_element_by_xpath(xp)
-    #             if(numElement.value_of_css_property('color')=="rgba(255, 0, 0, 1)"):
-    #                 answer.append(NUMS_DICT[numElement.text])
-
-    #         except NoSuchElementException as identifier:
-    #             print("pass!")
-
-    # print(probnum)
-    # print(answer)
-    if(len(answer) == 5):
-        while(tmpval < 5):
+    if len(answer) == 5:
+        while tmpval < 5:
             probnum.append(toInt(prob[tmpval]))
-            if(findDB(probnum[tmpval])):
+            if checkDB(probnum[tmpval]):
                 dbtuple = (probnum[tmpval], answer[tmpval])
                 print(dbtuple)
                 sql = "INSERT INTO answerSheet(qid,qans) VALUES(%s,%s)"
@@ -259,28 +263,25 @@ def pre_getAnswer(driver):
 
 
 # MAIN function
-benID = 'angrypig777@gmail.com'
-# benID = input('Benedu Email: ')
-# benPW = ''
-benPW = input('Benedu Password: ')
-i=0
+i = 0
 
 driver = webdriver.Chrome('chromedriver.exe')
-# driver.maximize_window()
-
+driver.maximize_window()
 login(benID, benPW)
 
 while 1:
+    i += 1
+
     createTestSheet()
     time.sleep(0.5)
 
-    gotoPage(driver)
+    crawlTest()
     time.sleep(0.5)
 
-    deletetestsheet(driver)
+    deleteSheet()
     time.sleep(0.5)
-    print("Loop complete: " + i)
+    print("Loop complete: " + str(i))
 
 # conn.close()
 
-# gotoPage 함수에선 문제를 생성은 안하고 푸는것만 함. 아직 미완성 안에 solve함수를 문제 시트마다 접근한다.
+# crawlTest 함수에선 문제를 생성은 안하고 푸는것만 함. 아직 미완성 안에 solve함수를 문제 시트마다 접근한다.
