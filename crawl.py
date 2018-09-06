@@ -1,4 +1,3 @@
-
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -31,21 +30,31 @@ NUMS_DICT = {
     "nine": "9",
 }
 
-# 수학은 없다. 나중에 주관식을 처리할 수 있게 할떄 만들예정.
 SUBJECT_DICT = {
-    "korean" : '//*[@id="body_rdoSbjCode_0"]',
-    "english" : '//*[@id="body_rdoSbjCode_2"]',
-    "history" : '//*[@id="body_rdoSbjCode_3"]',
-    "physics" : '//*[@id="body_rdoSbjCode_4"]',
-    "chemistry" : '//*[@id="body_rdoSbjCode_5"]',
-    "industry" : '//*[@id="body_rdoSbjCode_7"]',
-    "drafting" : '//*[@id="body_rdoSbjCode_8"]'
+    # !!수학은 주관식 추가해야함!!
+    "korean": '#body_rdoSbjCode_0',
+    "math": '#body_rdoSbjCode_1',
+    "english": '#body_rdoSbjCode_2',
+    "history": '#body_rdoSbjCode_3',
+    "physics1": '#body_rdoSbjCode_4',
+    "chemistry1": '#body_rdoSbjCode_5',
+    "science": '#body_rdoSbjCode_6',
+    "industry": '#body_rdoSbjCode_7',
+    "drafting": '#body_rdoSbjCode_8'
+
+    # "korean" : '//*[@id="body_rdoSbjCode_0"]',
+    # "english" : '//*[@id="body_rdoSbjCode_2"]',
+    # "history" : '//*[@id="body_rdoSbjCode_3"]',
+    # "physics" : '//*[@id="body_rdoSbjCode_4"]',
+    # "chemistry" : '//*[@id="body_rdoSbjCode_5"]',
+    # "industry" : '//*[@id="body_rdoSbjCode_7"]',
+    # "drafting" : '//*[@id="body_rdoSbjCode_8"]'
 }
 
 indexURL = 'https://benedu.co.kr/Index.aspx'
 mainURL = 'https://www.benedu.co.kr/Views/01_Students/00StdHome.aspx'
 testURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
-createSheetURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy01Question.aspx'
+createSheetURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
 
 conn = pymysql.connect(host='115.68.231.45', port=3306, user=sql_user, password=sql_pw, database='benedu')
 cursor = conn.cursor()
@@ -53,7 +62,7 @@ cursor.execute("SELECT * FROM answerSheet;")
 rows = cursor.fetchall()
 
 
-def login(benID, benPW,driver):
+def login(benID, benPW):
     for i in range(15):
         print()
     print('------------------------------')
@@ -62,22 +71,24 @@ def login(benID, benPW,driver):
     driver.get(indexURL)
     time.sleep(0.2)
     assert "No results found." not in driver.page_source
-    driver.find_element_by_xpath('//*[@id="liLogin"]/a').click()
+
+    driver.find_element_by_css_selector('#liLogin > a').click()
     WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.XPATH, '//*[@id="inputEmail"]')))
+        EC.visibility_of_element_located((By.CSS_SELECTOR, '#inputEmail')))
     time.sleep(0.2)
-    driver.find_element_by_xpath('//*[@id="inputEmail"]').send_keys(benID)
-    driver.find_element_by_xpath('//*[@id="inputPassword"]').send_keys(benPW)
+    driver.find_element_by_css_selector('#inputEmail').send_keys(benID)
+    time.sleep(0.1)
+    driver.find_element_by_css_selector('#inputPassword').send_keys(benPW)
     time.sleep(0.2)
-    driver.find_element_by_xpath('//*[@id="btnLogin"]').click()
-    time.sleep(1.5)
+    driver.find_element_by_css_selector('#btnLogin').click()
+    time.sleep(0.2)
     WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.XPATH, '//*[@id="mnu06StdMyBenedu"]/a')))
-    time.sleep(0.2)
-    return driver
+        EC.visibility_of_element_located((By.CSS_SELECTOR, '#mnu02StdGrade > a')))
+    time.sleep(1.2)
+
+    return
 
 
-# rand_delay는 받는 시간 +-5초 사이의 딜레이를 준다.... 최소 5초는 줘라
 def rand_delay(t):
     oper = random.choice(['plus','minus'])
     if(oper == 'plus'):
@@ -87,50 +98,38 @@ def rand_delay(t):
     return
 
 
-def createTestSheet(driver):
-    WebDriverWait(driver, 5).until(
-        EC.visibility_of_element_located((By.XPATH, '//*[@id="mnu03StdStudy"]/a')))
-    driver.find_element_by_xpath('//*[@id="mnu03StdStudy"]/a').click()
-    time.sleep(0.1)
-    WebDriverWait(driver, 5).until(
-        EC.visibility_of_element_located((By.XPATH, '//*[@id="mnu03StdStudy"]/ul/li[1]/a')))
-    driver.find_element_by_xpath('//*[@id="mnu03StdStudy"]/ul/li[1]/a').click()
+def createTestSheet():
+    driver.get(createSheetURL)
+    time.sleep(0.5)
 
-    WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.XPATH, '//*[@id=\"tab_tag_1_1\"]')))
-    while True:
-        if EC.presence_of_all_elements_located:
-            break
-        else:
-            continue
+    WebDriverWait(driver, 5).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, SUBJECT_DICT['korean'])))
+    driver.find_element_by_css_selector(SUBJECT_DICT['korean']).click()
     time.sleep(0.2)
 
-    driver.find_element_by_xpath(SUBJECT_DICT["english"]).click()
-    time.sleep(1)
-    # 뽑아오는 문제는 3학년으로 한정.
-    driver.find_element_by_xpath('//*[@id="body_chkGrade3"]').click()
-    time.sleep(1)
-    # 모의고사, 수능 한정.
-    driver.find_element_by_xpath('//*[@id="body_chkSrc01"]').click()
-    time.sleep(1)
-    # 45문제 한정.
-    driver.find_element_by_xpath('//*[@id="body_TextBox2"]').clear()
-    driver.find_element_by_xpath('//*[@id="body_TextBox2"]').send_keys('45')
-    time.sleep(1)
-    # 풀어본 문항 제외
-    driver.find_element_by_xpath('//*[@id="body_chkOption01"]').click()
-    time.sleep(1)
-    # 문항 검색
-    driver.find_element_by_xpath('//*[@id="body_btnExecute"]').click()
+    driver.find_element_by_css_selector('#body_chkGrade2').click()  # 2학년
+    time.sleep(0.2)
+    driver.find_element_by_css_selector('#body_chkSrc01').click()  # 모의고사만
+    time.sleep(0.2)
+    driver.find_element_by_css_selector('#body_chkSrc01').clear()  # 문항 수 삭제
+    time.sleep(0.5)
+    driver.find_element_by_css_selector('#body_chkSrc01').send_keys('45')  # 문항 수 45
+    time.sleep(0.5)
+    driver.find_element_by_css_selector('#body_btnExecute').click()  # 검색
 
-    WebDriverWait(driver, 8).until(EC.visibility_of_element_located((By.XPATH, '//*[@id="body_txtTestName"]')))
-    WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="btnSave2"]')))
-    driver.find_element_by_xpath('//*[@id="btnSave2"]').click()
     WebDriverWait(driver, 8).until(
-        EC.visibility_of_element_located((By.XPATH, '//*[@id="MessageForm"]/div/div/div[2]/div')))
-    time.sleep(2)
-    driver.find_element_by_xpath('//*[@id="btnCancel"]').click()
+        EC.visibility_of_element_located((By.CSS_SELECTOR, '#body_txtTestName')))
+    WebDriverWait(driver, 8).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, '#btnSave2')))  # 저장 버튼 로딩까지 대기
+    time.sleep(0.8)
+    driver.find_element_by_css_selector('#body_txtTestName').clear()
+    time.sleep(0.5)
+    driver.find_element_by_css_selector('#body_txtTestName').send_keys('CRAWLSHEET')
     time.sleep(0.2)
+    driver.find_element_by_css_selector('#btnSave2').click()
+    WebDriverWait(driver, 8).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, '#btnDoTest')))  # 바로 응시하기 나올때까지 대기
+    time.sleep(0.5)
 
     return
 
@@ -142,9 +141,9 @@ def deletetestsheet(driver):
     time.sleep(random.randint(1,3))
     driver.find_element_by_xpath('//*[@id="DT_TestList"]/tbody/tr[1]/td[1]/input').click()
     driver.execute_script('Checked_Delete()')
-    rand_delay(4)
+    time.sleep(0.5)
     driver.execute_script('Checked_Delete_OK()')
-    rand_delay(4)
+    time.sleep(0.5)
     driver.find_element_by_xpath('//*[@id="AlertForm"]/div/div/div[3]/div/div[2]/button').click()
     time.sleep(2)
     return
@@ -177,6 +176,8 @@ def toInt(tmpString):
 
 
 def findDB(probNum):
+    cursor.execute("SELECT * FROM answerSheet;")
+    rows = cursor.fetchall()
     for row in rows:
         # row[0] : id, row[1] : qid, row[2] : qans, row[3]: qtext, row[4]:timestamp
         if(probNum == row[1]):
@@ -256,31 +257,30 @@ def pre_getAnswer(driver):
             tmpval += 1
         conn.commit()
 
-def crawlMain():
-    # benID = input('Benedu Email: ')
-    # benPW = input('Benedu Password: ')
-    benID = 'mamy0320@naver.com'
-    benPW = 'thdehehd1302'
-    liter = int(input('문제 답안 크롤링 횟수'))
 
-    driver = webdriver.Chrome('chromedriver.exe')
-    #driver.maximize_window()
+# MAIN function
+benID = 'angrypig777@gmail.com'
+# benID = input('Benedu Email: ')
+# benPW = ''
+benPW = input('Benedu Password: ')
+i=0
 
-    driver = login(benID, benPW,driver)
+driver = webdriver.Chrome('chromedriver.exe')
+# driver.maximize_window()
 
-    for i in range(liter):
-        createTestSheet(driver)
-        rand_delay(4)
-        # login는 내가 만든 함수메인 페이지까지 간다. 간 후 driver를 리턴한다.
-        gotoPage(driver)
-        rand_delay(4)
-        deletetestsheet(driver)
-        rand_delay(4)
-        cursor.execute("SELECT * FROM answerSheet;")
-        rows = cursor.fetchall()
-        print("liter complete! counter: " + str(i))
+login(benID, benPW)
 
+while 1:
+    createTestSheet()
+    time.sleep(0.5)
 
-    conn.close()
+    gotoPage(driver)
+    time.sleep(0.5)
+
+    deletetestsheet(driver)
+    time.sleep(0.5)
+    print("Loop complete: " + i)
+
+# conn.close()
 
 # gotoPage 함수에선 문제를 생성은 안하고 푸는것만 함. 아직 미완성 안에 solve함수를 문제 시트마다 접근한다.
