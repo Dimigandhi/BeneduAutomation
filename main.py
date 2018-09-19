@@ -24,7 +24,7 @@
 import crawl as crawl
 import use as use
 
-#crawl.crawlMain()
-use.useMain()
+crawl.crawlMain()
+#use.useMain()
 
 

@@ -54,7 +54,7 @@ rows = cursor.fetchall()
 
 
 def login(benID, benPW,driver):
-    for i in range(15):
+    for jj in range(15):
         print()
     print('------------------------------')
     print()
@@ -105,7 +105,7 @@ def createTestSheet(driver):
             continue
     time.sleep(0.2)
 
-    driver.find_element_by_xpath(SUBJECT_DICT["english"]).click()
+    driver.find_element_by_xpath(SUBJECT_DICT["korean"]).click()
     time.sleep(1)
     # 뽑아오는 문제는 3학년으로 한정.
     driver.find_element_by_xpath('//*[@id="body_chkGrade3"]').click()
