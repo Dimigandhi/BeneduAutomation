@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import pymysql, random, time
 
 
-sql_ip = '115.68.231.45'
+sql_ip = '149.28.29.84'
 sql_user = 'benedu_READ'
 sql_pw = 'benpass'
 
@@ -147,17 +147,25 @@ def markAnswer(probIndex, answerNum):
     probIndex += 1
 
     js_script = 'ClickAnswer("' + str(probIndex) + '", "' + str(answerNum) + '");'
-    print(js_script)
     try:
         driver.execute_script(js_script)
+        print(js_script)
+
     except:
-        number = driver.find_element_by_css_selector(
-            '#AnswerArea > div > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(1) > td:nth-child(1)').text
-        print(str(number))
-        element = "#btn_" + str(number) + "_" + str(probIndex)
-        driver.find_element_by_css_selector(element).click()
-        time.sleep(0.1)
-    return
+        try:
+            time.sleep(0.2)
+            number = driver.find_element_by_css_selector(
+                '#AnswerArea > div > div > div:nth-child(1) > div > div > table > tbody > tr:nth-child(1) > td:nth-child(1)').text
+            number = int(number) - 1 + probIndex
+            element = "#btn_" + str(number) + "_" + str(answerNum)
+            driver.find_element_by_css_selector(element).click()
+            time.sleep(0.1)
+
+        except:
+            print("Error_Element: " + str(element))
+            time.sleep(0.2)
+            return 0
+    return 1
 
 
 def process():
@@ -181,7 +189,11 @@ def process():
             print("QID[" + str(prob_id) + "] not stored in DB")
         else:
             print("ProbNUM[" + str(probnum+1) + "]: prob_id[" + str(prob_id) + "]: prob_ans[" + str(prob_ans) + "]")
-            markAnswer(probnum, prob_ans)
+
+            mark_suc = 0
+            while mark_suc:
+                mark_suc = markAnswer(probnum, prob_ans)
+
 
         probnum += 1
         html = html[html_qid + 10:]

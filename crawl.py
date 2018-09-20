@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import pymysql, random, time
 
 
-sql_ip = '115.68.231.45'
+sql_ip = '149.28.29.84'
 sql_user = 'benedu_RW'
 sql_pw = 'bendbpass!@'
 
@@ -149,24 +149,29 @@ def createTestSheet():
 def deleteSheet():
     driver.get(testURL)
 
-    try:
-        driver.find_element_by_xpath('//*[text()[contains(.,\'CRAWLSHEET\')]]').click()
-    except:
-        print("DEBUG: CANNOT FIND CRAWLSHEET")
-        return
+    # try:
+    #     driver.find_element_by_xpath('//*[text()[contains(.,\'CRAWLSHEET\')]]').click()
+    # except:
+    #     print("DEBUG: CANNOT FIND CRAWLSHEET")
+    #     return
 
-    # driver.find_element_by_css_selector(
-    #     '#DT_TestList > tbody > tr:nth-child(1) > td:nth-child(1) > input[type="checkbox"]').click()  # 리스트 최상위 선택
-    time.sleep(0.2)
-    driver.find_element_by_css_selector('#container_left > button:nth-child(1)').click()  # 선택삭제버튼 클릭
-    time.sleep(1)
-    driver.find_element_by_css_selector(
-        '#CheckAllDeleteForm > div > div > div.box-footer > button.btn.btn-default').click()  # 삭제버튼 클릭
-    WebDriverWait(driver, 8).until(EC.visibility_of_element_located((
-        By.CSS_SELECTOR, '#txtMessage')))  # 모두 삭제되었습니다 메시지 확인
-    time.sleep(0.2)
-    driver.find_element_by_css_selector(
-        '#AlertForm > div > div > div.box-footer > div > div.container_item_c > button').click()  # 확인버튼
+    while 1:
+        for l in range(14):  # 시험지 모두 삭제
+            driver.find_element_by_css_selector(
+                '#DT_TestList > tbody > tr:nth-child(' + str(l+1) + ') > td:nth-child(1) > input[type="checkbox"]').click()
+
+        # driver.find_element_by_css_selector(
+        #     '#DT_TestList > tbody > tr:nth-child(1) > td:nth-child(1) > input[type="checkbox"]').click()  # 리스트 최상위 선택
+        time.sleep(0.2)
+        driver.find_element_by_css_selector('#container_left > button:nth-child(1)').click()  # 선택삭제버튼 클릭
+        time.sleep(1)
+        driver.find_element_by_css_selector(
+            '#CheckAllDeleteForm > div > div > div.box-footer > button.btn.btn-default').click()  # 삭제버튼 클릭
+        WebDriverWait(driver, 8).until(EC.visibility_of_element_located((
+            By.CSS_SELECTOR, '#txtMessage')))  # 모두 삭제되었습니다 메시지 확인
+        time.sleep(0.2)
+        driver.find_element_by_css_selector(
+            '#AlertForm > div > div > div.box-footer > div > div.container_item_c > button').click()  # 확인버튼
 
     return
 
