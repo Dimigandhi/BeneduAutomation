@@ -1,0 +1,7 @@
+SELECT qid, COUNT(qid)
+FROM answerSheet
+GROUP BY qid
+HAVING COUNT(qid) > 1;
+
+DELETE t2 FROM answerSheet t1, answerSheet t2
+WHERE t1.idx < t2.idx AND t1.qid = t2.qid
