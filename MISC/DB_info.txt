@@ -28,6 +28,14 @@ GRANT select ON benedu.* TO ¡®benedu_READ¡¯@'%¡¯;
 GRANT select, insert, update ON benedu.* TO ¡®benedu_RW¡¯@'%f¡¯;
 GRANT all privileges ON *.* TO ¡®admin¡¯@%'localhost¡¯;
 
+SELECT qid, COUNT(qid)
+FROM answerSheet
+GROUP BY qid
+HAVING COUNT(qid) > 1;
+
+DELETE t2 FROM answerSheet t1, answerSheet t2
+WHERE t1.idx < t2.idx AND t1.qid = t2.qid
+
 ####################WEB_Iwinv
 BeneduAutomationServer
 
