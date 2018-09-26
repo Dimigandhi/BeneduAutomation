@@ -3,5 +3,5 @@ Thumbs.db
 .idea/workspace.xml
 .git/
 .idea
-__pycache__
+__pycache__/
 ben.txt
