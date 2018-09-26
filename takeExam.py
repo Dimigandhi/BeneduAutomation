@@ -19,17 +19,13 @@ testURL = 'https://benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx
 createSheetURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
 taskURL = 'https://benedu.co.kr/Views/01_Students/03StdStudy04Homework.aspx'
 
-benID = 'angrypig777@gmail.com'
-# benID = input('Benedu Email: ')
-# benPW = ''
-benPW = input('Benedu Password: ')
 
 NUMS_DICT = {
-    "①" : 1,
-    "②" : 2,
-    "③" : 3,
-    "④" : 4,
-    "⑤" : 5,
+    "①": 1,
+    "②": 2,
+    "③": 3,
+    "④": 4,
+    "⑤": 5,
     "zero": "0",
     "one": "1",
     "two": "2",
@@ -53,14 +49,6 @@ SUBJECT_DICT = {
     "science": '#body_rdoSbjCode_6',
     "industry": '#body_rdoSbjCode_7',
     "drafting": '#body_rdoSbjCode_8'
-
-    # "korean" : '//*[@id="body_rdoSbjCode_0"]',
-    # "english" : '//*[@id="body_rdoSbjCode_2"]',
-    # "history" : '//*[@id="body_rdoSbjCode_3"]',
-    # "physics" : '//*[@id="body_rdoSbjCode_4"]',
-    # "chemistry" : '//*[@id="body_rdoSbjCode_5"]',
-    # "industry" : '//*[@id="body_rdoSbjCode_7"]',
-    # "drafting" : '//*[@id="body_rdoSbjCode_8"]'
 }
 
 conn = pymysql.connect(host=sql_ip, port=3306, user=sql_user, password=sql_pw, database='benedu')
@@ -80,19 +68,7 @@ SUBJECT_DICT = {
 }
 
 
-def rand_delay(t):
-    oper = random.choice(['plus', 'minus'])
-    if oper == 'plus':
-        time.sleep(t+random.randint(1,3))
-    else:
-        time.sleep(t-random.randint(1,3))
-    return
-
-
 def login(benID, benPW):
-    for i in range(15):
-        print()
-    print('------------------------------')
     print()
 
     driver.get(indexURL)
@@ -200,6 +176,14 @@ def process():
 
 
 # MAIN function
+benID = 'angrypig777@gmail.com'
+# benID = input('Benedu Email: ')
+# benPW = ''
+benPW = input('Benedu Password: ')
+for i in range(25):
+    print()
+print('------------------------------')
+
 loop = 0
 
 driver = webdriver.Chrome('chromedriver.exe')

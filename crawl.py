@@ -19,17 +19,12 @@ testURL = 'https://benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx
 createSheetURL = 'https://www.benedu.co.kr/Views/01_Students/03StdStudy02PaperTestList.aspx'
 taskURL = 'https://benedu.co.kr/Views/01_Students/03StdStudy04Homework.aspx'
 
-benID = 'angrypig777@gmail.com'
-# benID = input('Benedu Email: ')
-# benPW = ''
-benPW = input('Benedu Password: ')
-
 NUMS_DICT = {
-    "①" : 1,
-    "②" : 2,
-    "③" : 3,
-    "④" : 4,
-    "⑤" : 5,
+    "①": 1,
+    "②": 2,
+    "③": 3,
+    "④": 4,
+    "⑤": 5,
     "zero": "0",
     "one": "1",
     "two": "2",
@@ -61,19 +56,7 @@ cursor.execute("SELECT * FROM answerSheet;")
 rows = cursor.fetchall()
 
 
-def rand_delay(t):
-    oper = random.choice(['plus', 'minus'])
-    if oper == 'plus':
-        time.sleep(t+random.randint(1,3))
-    else:
-        time.sleep(t-random.randint(1,3))
-    return
-
-
 def login(benID, benPW):
-    for i in range(15):
-        print()
-    print('------------------------------')
     print()
 
     driver.get(indexURL)
@@ -108,8 +91,8 @@ def createTestSheet():
     time.sleep(0.5)
 
     WebDriverWait(driver, 5).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, SUBJECT_DICT['korean'])))
-    driver.find_element_by_css_selector(SUBJECT_DICT['korean']).click()
+        EC.visibility_of_element_located((By.CSS_SELECTOR, subject)))
+    driver.find_element_by_css_selector(subject).click()
     time.sleep(0.2)
 
     # driver.find_element_by_css_selector('#body_chkGrade1').click()  # 1학년
@@ -149,29 +132,18 @@ def createTestSheet():
 def deleteSheet():
     driver.get(testURL)
 
-    # try:
-    #     driver.find_element_by_xpath('//*[text()[contains(.,\'CRAWLSHEET\')]]').click()
-    # except:
-    #     print("DEBUG: CANNOT FIND CRAWLSHEET")
-    #     return
-
-    while 1:
-        for l in range(14):  # 시험지 모두 삭제
-            driver.find_element_by_css_selector(
-                '#DT_TestList > tbody > tr:nth-child(' + str(l+1) + ') > td:nth-child(1) > input[type="checkbox"]').click()
-
-        # driver.find_element_by_css_selector(
-        #     '#DT_TestList > tbody > tr:nth-child(1) > td:nth-child(1) > input[type="checkbox"]').click()  # 리스트 최상위 선택
-        time.sleep(0.2)
-        driver.find_element_by_css_selector('#container_left > button:nth-child(1)').click()  # 선택삭제버튼 클릭
-        time.sleep(1)
-        driver.find_element_by_css_selector(
-            '#CheckAllDeleteForm > div > div > div.box-footer > button.btn.btn-default').click()  # 삭제버튼 클릭
-        WebDriverWait(driver, 8).until(EC.visibility_of_element_located((
-            By.CSS_SELECTOR, '#txtMessage')))  # 모두 삭제되었습니다 메시지 확인
-        time.sleep(0.2)
-        driver.find_element_by_css_selector(
-            '#AlertForm > div > div > div.box-footer > div > div.container_item_c > button').click()  # 확인버튼
+    driver.find_element_by_css_selector(
+        '#DT_TestList > tbody > tr:nth-child(1) > td:nth-child(1) > input[type="checkbox"]').click()  # 리스트 최상위 선택
+    time.sleep(0.2)
+    driver.find_element_by_css_selector('#container_left > button:nth-child(1)').click()  # 선택삭제버튼 클릭
+    time.sleep(1)
+    driver.find_element_by_css_selector(
+        '#CheckAllDeleteForm > div > div > div.box-footer > button.btn.btn-default').click()  # 삭제버튼 클릭
+    WebDriverWait(driver, 8).until(EC.visibility_of_element_located((
+        By.CSS_SELECTOR, '#txtMessage')))  # 모두 삭제되었습니다 메시지 확인
+    time.sleep(0.2)
+    driver.find_element_by_css_selector(
+        '#AlertForm > div > div > div.box-footer > div > div.container_item_c > button').click()  # 확인버튼
 
     return
 
@@ -278,6 +250,29 @@ def parseAnswer(value):
 
 
 # MAIN function
+benID = 'angrypig777@gmail.com'
+# benID = input('Benedu Email: ')
+# benPW = ''
+benPW = input('Benedu Password: ')
+for i in range(25):
+    print()
+print('------------------------------')
+
+for i in SUBJECT_DICT:
+    print(str(i))
+
+print("크롤링할 과목 선택")
+print()
+while 1:
+    try:
+        global subject
+        subject = input()
+        subject = SUBJECT_DICT[subject]
+        break
+    except:
+        print("Invalid subject - try again")
+
+
 i = 0
 insert = 0
 insertLoopDB = 0
@@ -286,31 +281,11 @@ insertTotalDB = 0
 driver = webdriver.Chrome('chromedriver.exe')
 driver.maximize_window()
 login(benID, benPW)
-#
-# while 1:
-#     i += 1
-#
-#     createTestSheet()
-#     time.sleep(0.5)
-#
-#     crawlTest()
-#     time.sleep(0.5)
-#
-#     deleteSheet()
-#     time.sleep(0.5)
-#
-#     insertTotalDB += insertLoopDB
-#     insertLoopDB = 0
-#     print("Loop complete: " + str(i))
-#     print("Total DB insertion: " + str(insertTotalDB) + "/" + str(i * 45))
-#     print()
+
 
 while 1:
     try:
         i += 1
-
-        deleteSheet()
-        time.sleep(0.5)
 
         createTestSheet()
         time.sleep(0.5)
