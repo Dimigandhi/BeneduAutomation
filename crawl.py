@@ -56,7 +56,14 @@ cursor.execute("SELECT * FROM answerSheet;")
 rows = cursor.fetchall()
 
 
+<<<<<<< HEAD
 def login(benID, benPW):
+=======
+def login(benID, benPW,driver):
+    for jj in range(15):
+        print()
+    print('------------------------------')
+>>>>>>> 65030b749737dc35673d4b2cd5db29b3211c2930
     print()
 
     driver.get(indexURL)
@@ -95,6 +102,7 @@ def createTestSheet():
     driver.find_element_by_css_selector(subject).click()
     time.sleep(0.2)
 
+<<<<<<< HEAD
     # driver.find_element_by_css_selector('#body_chkGrade1').click()  # 1학년
     # time.sleep(0.2)
     # driver.find_element_by_css_selector('#body_chkGrade2').click()  # 2학년
@@ -111,6 +119,25 @@ def createTestSheet():
     driver.find_element_by_css_selector('#body_TextBox2').send_keys('45')  # 문항 수 45
     time.sleep(0.5)
     driver.find_element_by_css_selector('#body_btnExecute').click()  # 검색
+=======
+    driver.find_element_by_xpath(SUBJECT_DICT["korean"]).click()
+    time.sleep(1)
+    # 뽑아오는 문제는 3학년으로 한정.
+    driver.find_element_by_xpath('//*[@id="body_chkGrade3"]').click()
+    time.sleep(1)
+    # 모의고사, 수능 한정.
+    driver.find_element_by_xpath('//*[@id="body_chkSrc01"]').click()
+    time.sleep(1)
+    # 45문제 한정.
+    driver.find_element_by_xpath('//*[@id="body_TextBox2"]').clear()
+    driver.find_element_by_xpath('//*[@id="body_TextBox2"]').send_keys('45')
+    time.sleep(1)
+    # 풀어본 문항 제외
+    driver.find_element_by_xpath('//*[@id="body_chkOption01"]').click()
+    time.sleep(1)
+    # 문항 검색
+    driver.find_element_by_xpath('//*[@id="body_btnExecute"]').click()
+>>>>>>> 65030b749737dc35673d4b2cd5db29b3211c2930
 
     WebDriverWait(driver, 8).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, '#body_txtTestName')))
